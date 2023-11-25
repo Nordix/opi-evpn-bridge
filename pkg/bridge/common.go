@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+// Copyright (C) 2023 Nordix Foundation.
 
 // Package bridge is the main package of the application
 package bridge
@@ -26,6 +27,56 @@ func sortLogicalBridges(bridges []*pb.LogicalBridge) {
 	sort.Slice(bridges, func(i int, j int) bool {
 		return bridges[i].Name < bridges[j].Name
 	})
+}
+
+func (s *Server) createLogicalBridge(lb *pb.LogicalBridge) (*pb.LogicalBridge, error) {
+	// check parameters
+	if err := s.parameterCheck(lb); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainLB := infradb.NewBridge(lb)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.CreateLB(domainLB); err != nil {
+		return nil, err
+	}
+	s.ListHelper[lb.Name] = false
+	return domainLB.ToPb(), nil
+}
+
+func (s *Server) deleteLogicalBridge(name string) error {
+
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.DeleteLB(name); err != nil {
+		return err
+	}
+
+	delete(s.ListHelper, name)
+	return nil
+}
+
+func (s *Server) getLogicalBridge(name string) (*pb.LogicalBridge, error) {
+	domainLB, err := infradb.GetLB(name)
+	if err != nil {
+		return nil, err
+	}
+	return domainLB.ToPb(), nil
+}
+
+func (s *Server) updateLogicalBridge(lb *pb.LogicalBridge) (*infradb.LogicalBridge, error) {
+	// check parameters
+	if err := s.parameterCheck(lb); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainLB := infradb.NewBridge(lb)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.UpdateLB(domainLB); err != nil {
+		return nil, err
+	}
+	return domainLB, nil
 }
 
 func resourceIDToFullName(resourceID string) string {
