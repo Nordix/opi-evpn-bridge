@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+// Copyright (C) 2023 Nordix Foundation.
 
 // Package port is the main package of the application
 package port
@@ -28,6 +29,56 @@ func sortBridgePorts(ports []*pb.BridgePort) {
 	sort.Slice(ports, func(i int, j int) bool {
 		return ports[i].Name < ports[j].Name
 	})
+}
+
+func (s *Server) createBridgePort(bp *pb.BridgePort) (*pb.BridgePort, error) {
+	// check parameters
+	if err := s.parameterCheck(bp); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainBP := infradb.NewBridgePort(bp)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.CreateBP(domainBP); err != nil {
+		return nil, err
+	}
+	s.ListHelper[bp.Name] = false
+	return domainBP.ToPb(), nil
+}
+
+func (s *Server) deleteBridgePort(name string) error {
+
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.DeleteBP(name); err != nil {
+		return err
+	}
+
+	delete(s.ListHelper, name)
+	return nil
+}
+
+func (s *Server) getBridgePort(name string) (*pb.BridgePort, error) {
+	domainBP, err := infradb.GetBP(name)
+	if err != nil {
+		return nil, err
+	}
+	return domainBP.ToPb(), nil
+}
+
+func (s *Server) updateBridgePort(bp *pb.BridgePort) (*infradb.BridgePort, error) {
+	// check parameters
+	if err := s.parameterCheck(bp); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainBP := infradb.NewBridgePort(bp)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.UpdateBP(domainBP); err != nil {
+		return nil, err
+	}
+	return domainBP, nil
 }
 
 func resourceIDToFullName(resourceID string) string {
