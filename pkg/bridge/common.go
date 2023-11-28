@@ -64,7 +64,7 @@ func (s *Server) getLogicalBridge(name string) (*pb.LogicalBridge, error) {
 	return domainLB.ToPb(), nil
 }
 
-func (s *Server) updateLogicalBridge(lb *pb.LogicalBridge) (*infradb.LogicalBridge, error) {
+func (s *Server) updateLogicalBridge(lb *pb.LogicalBridge) (*pb.LogicalBridge, error) {
 	// check parameters
 	if err := s.parameterCheck(lb); err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (s *Server) updateLogicalBridge(lb *pb.LogicalBridge) (*infradb.LogicalBrid
 	if err := infradb.UpdateLB(domainLB); err != nil {
 		return nil, err
 	}
-	return domainLB, nil
+	return domainLB.ToPb(), nil
 }
 
 func resourceIDToFullName(resourceID string) string {

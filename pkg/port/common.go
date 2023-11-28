@@ -66,7 +66,7 @@ func (s *Server) getBridgePort(name string) (*pb.BridgePort, error) {
 	return domainBP.ToPb(), nil
 }
 
-func (s *Server) updateBridgePort(bp *pb.BridgePort) (*infradb.BridgePort, error) {
+func (s *Server) updateBridgePort(bp *pb.BridgePort) (*pb.BridgePort, error) {
 	// check parameters
 	if err := s.parameterCheck(bp); err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (s *Server) updateBridgePort(bp *pb.BridgePort) (*infradb.BridgePort, error
 	if err := infradb.UpdateBP(domainBP); err != nil {
 		return nil, err
 	}
-	return domainBP, nil
+	return domainBP.ToPb(), nil
 }
 
 func resourceIDToFullName(resourceID string) string {

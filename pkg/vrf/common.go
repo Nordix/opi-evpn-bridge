@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+// Copyright (C) 2023 Nordix Foundation.
 
 // Package vrf is the main package of the application
 package vrf
@@ -28,6 +29,56 @@ func sortVrfs(vrfs []*pb.Vrf) {
 	sort.Slice(vrfs, func(i int, j int) bool {
 		return vrfs[i].Name < vrfs[j].Name
 	})
+}
+
+func (s *Server) createVrf(vrf *pb.Vrf) (*pb.Vrf, error) {
+	// check parameters
+	if err := s.parameterCheck(vrf); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainVrf := infradb.NewVrf(vrf)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.CreateVrf(domainVrf); err != nil {
+		return nil, err
+	}
+	s.ListHelper[vrf.Name] = false
+	return domainVrf.ToPb(), nil
+}
+
+func (s *Server) deleteVrf(name string) error {
+
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.DeleteVrf(name); err != nil {
+		return err
+	}
+
+	delete(s.ListHelper, name)
+	return nil
+}
+
+func (s *Server) getVrf(name string) (*pb.Vrf, error) {
+	domainVrf, err := infradb.GetVrf(name)
+	if err != nil {
+		return nil, err
+	}
+	return domainVrf.ToPb(), nil
+}
+
+func (s *Server) updateVrf(vrf *pb.Vrf) (*pb.Vrf, error) {
+	// check parameters
+	if err := s.parameterCheck(vrf); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainVrf := infradb.NewVrf(vrf)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.UpdateVrf(domainVrf); err != nil {
+		return nil, err
+	}
+	return domainVrf.ToPb(), nil
 }
 
 func resourceIDToFullName(resourceID string) string {
