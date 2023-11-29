@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/dgraph-io/badger"
 	"github.com/google/uuid"
@@ -62,6 +63,7 @@ func (s *Server) CreateSvi(ctx context.Context, in *pb.CreateSviRequest) (*pb.Sv
 func (s *Server) DeleteSvi(ctx context.Context, in *pb.DeleteSviRequest) (*emptypb.Empty, error) {
 	// check input correctness
 	if err := s.validateDeleteSviRequest(in); err != nil {
+		fmt.Printf("DeleteSvi(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -127,7 +129,7 @@ func (s *Server) UpdateSvi(ctx context.Context, in *pb.UpdateSviRequest) (*pb.Sv
 
 	// Check if the object before the application of the field mask
 	// is different with the one after the application of the field mask
-	if sviObj.Spec == updatedsviObj.Spec {
+	if reflect.DeepEqual(sviObj, updatedsviObj) {
 		return sviObj, nil
 	}
 
@@ -144,6 +146,7 @@ func (s *Server) UpdateSvi(ctx context.Context, in *pb.UpdateSviRequest) (*pb.Sv
 func (s *Server) GetSvi(ctx context.Context, in *pb.GetSviRequest) (*pb.Svi, error) {
 	// check input correctness
 	if err := s.validateGetSviRequest(in); err != nil {
+		fmt.Printf("GetSvi(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -165,6 +168,7 @@ func (s *Server) GetSvi(ctx context.Context, in *pb.GetSviRequest) (*pb.Svi, err
 func (s *Server) ListSvis(_ context.Context, in *pb.ListSvisRequest) (*pb.ListSvisResponse, error) {
 	// check required fields
 	if err := s.validateListSvisRequest(in); err != nil {
+		fmt.Printf("ListSvis(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch pagination from the database, calculate size and offset

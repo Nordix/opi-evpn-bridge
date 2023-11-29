@@ -91,3 +91,11 @@ func (s *Server) validateGetSviRequest(in *pb.GetSviRequest) error {
 	// Validate that a resource name conforms to the restrictions outlined in AIP-122.
 	return resourcename.Validate(in.Name)
 }
+
+func (s *Server) validateListSvisRequest(in *pb.ListSvisRequest) error {
+	// check required fields
+	if err := fieldbehavior.ValidateRequiredFields(in); err != nil {
+		return err
+	}
+	return nil
+}

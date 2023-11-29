@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/dgraph-io/badger"
 	"github.com/google/uuid"
@@ -62,6 +63,7 @@ func (s *Server) CreateVrf(ctx context.Context, in *pb.CreateVrfRequest) (*pb.Vr
 func (s *Server) DeleteVrf(ctx context.Context, in *pb.DeleteVrfRequest) (*emptypb.Empty, error) {
 	// check input correctness
 	if err := s.validateDeleteVrfRequest(in); err != nil {
+		fmt.Printf("DeleteVrf(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -126,7 +128,7 @@ func (s *Server) UpdateVrf(ctx context.Context, in *pb.UpdateVrfRequest) (*pb.Vr
 
 	// Check if the object before the application of the field mask
 	// is different with the one after the application of the field mask
-	if vrfObj.Spec == updatedvrfObj.Spec {
+	if reflect.DeepEqual(vrfObj, updatedvrfObj) {
 		return vrfObj, nil
 	}
 
@@ -143,6 +145,7 @@ func (s *Server) UpdateVrf(ctx context.Context, in *pb.UpdateVrfRequest) (*pb.Vr
 func (s *Server) GetVrf(ctx context.Context, in *pb.GetVrfRequest) (*pb.Vrf, error) {
 	// check input correctness
 	if err := s.validateGetVrfRequest(in); err != nil {
+		fmt.Printf("GetVrf(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -164,6 +167,7 @@ func (s *Server) GetVrf(ctx context.Context, in *pb.GetVrfRequest) (*pb.Vrf, err
 func (s *Server) ListVrfs(_ context.Context, in *pb.ListVrfsRequest) (*pb.ListVrfsResponse, error) {
 	// check required fields
 	if err := s.validateListVrfsRequest(in); err != nil {
+		fmt.Printf("ListVrfs(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch pagination from the database, calculate size and offset

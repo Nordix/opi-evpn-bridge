@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/dgraph-io/badger"
 	"github.com/google/uuid"
@@ -63,6 +64,7 @@ func (s *Server) CreateLogicalBridge(ctx context.Context, in *pb.CreateLogicalBr
 func (s *Server) DeleteLogicalBridge(ctx context.Context, in *pb.DeleteLogicalBridgeRequest) (*emptypb.Empty, error) {
 	// check input correctness
 	if err := s.validateDeleteLogicalBridgeRequest(in); err != nil {
+		fmt.Printf("DeleteLogicalBridge(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -129,7 +131,7 @@ func (s *Server) UpdateLogicalBridge(ctx context.Context, in *pb.UpdateLogicalBr
 
 	// Check if the object before the application of the field mask
 	// is different with the one after the application of the field mask
-	if lbObj.Spec == updatedlbObj.Spec {
+	if reflect.DeepEqual(lbObj, updatedlbObj) {
 		return lbObj, nil
 	}
 
@@ -146,6 +148,7 @@ func (s *Server) UpdateLogicalBridge(ctx context.Context, in *pb.UpdateLogicalBr
 func (s *Server) GetLogicalBridge(ctx context.Context, in *pb.GetLogicalBridgeRequest) (*pb.LogicalBridge, error) {
 	// check input correctness
 	if err := s.validateGetLogicalBridgeRequest(in); err != nil {
+		fmt.Printf("GetLogicalBridge(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -167,6 +170,7 @@ func (s *Server) GetLogicalBridge(ctx context.Context, in *pb.GetLogicalBridgeRe
 func (s *Server) ListLogicalBridges(_ context.Context, in *pb.ListLogicalBridgesRequest) (*pb.ListLogicalBridgesResponse, error) {
 	// check input correctness
 	if err := s.validateListLogicalBridgesRequest(in); err != nil {
+		fmt.Printf("ListLogicalBridges(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch pagination from the database, calculate size and offset

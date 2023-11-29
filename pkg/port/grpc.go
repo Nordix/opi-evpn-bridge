@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/dgraph-io/badger"
 	"github.com/google/uuid"
@@ -61,6 +62,7 @@ func (s *Server) CreateBridgePort(ctx context.Context, in *pb.CreateBridgePortRe
 func (s *Server) DeleteBridgePort(ctx context.Context, in *pb.DeleteBridgePortRequest) (*emptypb.Empty, error) {
 	// check input correctness
 	if err := s.validateDeleteBridgePortRequest(in); err != nil {
+		fmt.Printf("DeleteBridgePort(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -125,7 +127,7 @@ func (s *Server) UpdateBridgePort(ctx context.Context, in *pb.UpdateBridgePortRe
 
 	// Check if the object before the application of the field mask
 	// is different with the one after the application of the field mask
-	if bpObj.Spec == updatedbpObj.Spec {
+	if reflect.DeepEqual(bpObj, updatedbpObj) {
 		return bpObj, nil
 	}
 
@@ -142,6 +144,7 @@ func (s *Server) UpdateBridgePort(ctx context.Context, in *pb.UpdateBridgePortRe
 func (s *Server) GetBridgePort(ctx context.Context, in *pb.GetBridgePortRequest) (*pb.BridgePort, error) {
 	// check input correctness
 	if err := s.validateGetBridgePortRequest(in); err != nil {
+		fmt.Printf("GetBridgePort(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch object from the database
@@ -163,6 +166,7 @@ func (s *Server) GetBridgePort(ctx context.Context, in *pb.GetBridgePortRequest)
 func (s *Server) ListBridgePorts(_ context.Context, in *pb.ListBridgePortsRequest) (*pb.ListBridgePortsResponse, error) {
 	// check required fields
 	if err := s.validateListBridgePortsRequest(in); err != nil {
+		fmt.Printf("ListBridgePorts(): validation failure: %v", err)
 		return nil, err
 	}
 	// fetch pagination from the database, calculate size and offset
