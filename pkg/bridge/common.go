@@ -31,7 +31,7 @@ func sortLogicalBridges(bridges []*pb.LogicalBridge) {
 
 func (s *Server) createLogicalBridge(lb *pb.LogicalBridge) (*pb.LogicalBridge, error) {
 	// check parameters
-	if err := s.parameterCheck(lb); err != nil {
+	if err := s.validateLogicalBridgeSpec(lb); err != nil {
 		return nil, err
 	}
 
@@ -66,7 +66,7 @@ func (s *Server) getLogicalBridge(name string) (*pb.LogicalBridge, error) {
 
 func (s *Server) updateLogicalBridge(lb *pb.LogicalBridge) (*pb.LogicalBridge, error) {
 	// check parameters
-	if err := s.parameterCheck(lb); err != nil {
+	if err := s.validateLogicalBridgeSpec(lb); err != nil {
 		return nil, err
 	}
 

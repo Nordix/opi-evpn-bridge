@@ -32,21 +32,14 @@ func (s *Server) validateCreateVrfRequest(in *pb.CreateVrfRequest) error {
 	return nil
 }
 
-func (s *Server) parameterCheck(vrf *pb.Vrf) error {
+func (s *Server) validateVrfSpec(vrf *pb.Vrf) error {
 
 	// check vni is in range
 	if (vrf.Spec.Vni != nil) && (*vrf.Spec.Vni < 1 || *vrf.Spec.Vni > 16777215) {
 		msg := fmt.Sprintf("Vni value (%d) have to be between 1 and 16777215", *vrf.Spec.Vni)
 		return status.Errorf(codes.InvalidArgument, msg)
 	}
-
-	// Check required LoopbackIpPrefix field
-	// Dimitris: Do we need to have checks around the values of the IPs ?
-	// If yes we need to do that in all Pb objects.
-	if vrf.Spec.LoopbackIpPrefix == nil {
-		msg := fmt.Sprintf(" LoopbackIpPrefix is required. Please provide a value")
-		return status.Errorf(codes.InvalidArgument, msg)
-	}
+	// Dimitris: Do we need to validate the loopback_ip_prefix, vtep_ip_prefix ?
 	return nil
 }
 

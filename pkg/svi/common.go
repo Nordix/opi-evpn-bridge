@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+// Copyright (C) 2023 Nordix Foundation.
 
 // Package svi is the main package of the application
 package svi
@@ -28,6 +29,56 @@ func sortSvis(svis []*pb.Svi) {
 	sort.Slice(svis, func(i int, j int) bool {
 		return svis[i].Name < svis[j].Name
 	})
+}
+
+func (s *Server) createSvi(svi *pb.Svi) (*pb.Svi, error) {
+	// check parameters
+	if err := s.validateSviSpec(svi); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainSvi := infradb.NewSvi(svi)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.CreateSvi(domainSvi); err != nil {
+		return nil, err
+	}
+	s.ListHelper[svi.Name] = false
+	return domainSvi.ToPb(), nil
+}
+
+func (s *Server) deleteSvi(name string) error {
+
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.DeleteSvi(name); err != nil {
+		return err
+	}
+
+	delete(s.ListHelper, name)
+	return nil
+}
+
+func (s *Server) getSvi(name string) (*pb.Svi, error) {
+	domainSvi, err := infradb.GetSvi(name)
+	if err != nil {
+		return nil, err
+	}
+	return domainSvi.ToPb(), nil
+}
+
+func (s *Server) updateSvi(svi *pb.Svi) (*pb.Svi, error) {
+	// check parameters
+	if err := s.validateSviSpec(svi); err != nil {
+		return nil, err
+	}
+
+	// translation of pb to domain object
+	domainSvi := infradb.NewSvi(svi)
+	// Note: The status of the object will be generated in infraDB operation not here
+	if err := infradb.UpdateSvi(domainSvi); err != nil {
+		return nil, err
+	}
+	return domainSvi.ToPb(), nil
 }
 
 func resourceIDToFullName(resourceID string) string {

@@ -33,7 +33,7 @@ func sortVrfs(vrfs []*pb.Vrf) {
 
 func (s *Server) createVrf(vrf *pb.Vrf) (*pb.Vrf, error) {
 	// check parameters
-	if err := s.parameterCheck(vrf); err != nil {
+	if err := s.validateVrfSpec(vrf); err != nil {
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func (s *Server) getVrf(name string) (*pb.Vrf, error) {
 
 func (s *Server) updateVrf(vrf *pb.Vrf) (*pb.Vrf, error) {
 	// check parameters
-	if err := s.parameterCheck(vrf); err != nil {
+	if err := s.validateVrfSpec(vrf); err != nil {
 		return nil, err
 	}
 

@@ -34,7 +34,7 @@ func (s *Server) validateCreateLogicalBridgeRequest(in *pb.CreateLogicalBridgeRe
 	return nil
 }
 
-func (s *Server) parameterCheck(lb *pb.LogicalBridge) error {
+func (s *Server) validateLogicalBridgeSpec(lb *pb.LogicalBridge) error {
 	// check vlan id is in range
 	if lb.Spec.VlanId < 1 || lb.Spec.VlanId > 4095 {
 		msg := fmt.Sprintf("VlanId value (%d) have to be between 1 and 4095", lb.Spec.VlanId)
@@ -46,6 +46,8 @@ func (s *Server) parameterCheck(lb *pb.LogicalBridge) error {
 		msg := fmt.Sprintf("Vni value (%d) have to be between 1 and 16777215", *lb.Spec.Vni)
 		return status.Errorf(codes.InvalidArgument, msg)
 	}
+
+	// Dimitris: Should I validate the vtep_ip_prefix ?
 	return nil
 }
 

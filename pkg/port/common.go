@@ -33,7 +33,7 @@ func sortBridgePorts(ports []*pb.BridgePort) {
 
 func (s *Server) createBridgePort(bp *pb.BridgePort) (*pb.BridgePort, error) {
 	// check parameters
-	if err := s.parameterCheck(bp); err != nil {
+	if err := s.validateBridgePortSpec(bp); err != nil {
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func (s *Server) getBridgePort(name string) (*pb.BridgePort, error) {
 
 func (s *Server) updateBridgePort(bp *pb.BridgePort) (*pb.BridgePort, error) {
 	// check parameters
-	if err := s.parameterCheck(bp); err != nil {
+	if err := s.validateBridgePortSpec(bp); err != nil {
 		return nil, err
 	}
 

@@ -109,7 +109,7 @@ func (s *Server) UpdateLogicalBridge(ctx context.Context, in *pb.UpdateLogicalBr
 			return nil, err
 		}
 
-		log.Printf("UpdateLogicalBridge(): Logical Bidge with id %v is not found so it will be created", in.LogicalBridge.Name)
+		log.Printf("UpdateLogicalBridge(): Logical Bridge with id %v is not found so it will be created", in.LogicalBridge.Name)
 
 		// Store the domain object into DB
 		response, err := s.createLogicalBridge(in.LogicalBridge)
