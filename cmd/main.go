@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2022-2023 Intel Corporation, or its subsidiaries.
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+// Copyright (C) 2023 Nordix Foundation.
 
 // Package main is the main package of the application
 package main
@@ -22,9 +23,6 @@ import (
 	"github.com/opiproject/opi-evpn-bridge/pkg/utils"
 	"github.com/opiproject/opi-evpn-bridge/pkg/vrf"
 	"github.com/opiproject/opi-smbios-bridge/pkg/inventory"
-
-	"github.com/philippgille/gokv"
-	"github.com/philippgille/gokv/redis"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -54,26 +52,11 @@ func main() {
 
 	flag.Parse()
 
-	// Create KV store for persistence
-	options := redis.DefaultOptions
-	options.Address = redisAddress
-	options.Codec = utils.ProtoCodec{}
-	store, err := redis.NewClient(options)
-	if err != nil {
-		log.Panic(err)
-	}
-	defer func(store gokv.Store) {
-		err := store.Close()
-		if err != nil {
-			log.Panic(err)
-		}
-	}(store)
-
 	go runGatewayServer(grpcPort, httpPort)
-	runGrpcServer(grpcPort, tlsFiles, frrAddress, store)
+	runGrpcServer(grpcPort, tlsFiles)
 }
 
-func runGrpcServer(grpcPort int, tlsFiles, frrAddress string, store gokv.Store) {
+func runGrpcServer(grpcPort int, tlsFiles string) {
 	tp := utils.InitTracerProvider("opi-evpn-bridge")
 	defer func() {
 		if err := tp.Shutdown(context.Background()); err != nil {
@@ -115,14 +98,10 @@ func runGrpcServer(grpcPort int, tlsFiles, frrAddress string, store gokv.Store) 
 	)
 	s := grpc.NewServer(serverOptions...)
 
-	nLink := utils.NewNetlinkWrapper()
-	frr := utils.NewFrrWrapperWithArgs(frrAddress)
-
-	bridgeServer := bridge.NewServerWithArgs(nLink, frr, store)
-	portServer := port.NewServerWithArgs(nLink, frr, store)
-	vrfServer := vrf.NewServerWithArgs(nLink, frr, store)
-	sviServer := svi.NewServerWithArgs(nLink, frr, store)
-
+	bridgeServer := bridge.NewServer()
+	portServer := port.NewServer()
+	vrfServer := vrf.NewServer()
+	sviServer := svi.NewServer()
 	pe.RegisterLogicalBridgeServiceServer(s, bridgeServer)
 	pe.RegisterBridgePortServiceServer(s, portServer)
 	pe.RegisterVrfServiceServer(s, vrfServer)
