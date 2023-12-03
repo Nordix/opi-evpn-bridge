@@ -2,7 +2,7 @@
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
 
 // Package models translates frontend protobuf messages to backend messages
-package models
+package infradb
 
 import (
 	// "encoding/binary"
@@ -18,8 +18,11 @@ type Bridge struct {
 	Vni       uint32
 	VlanID    uint32
 	VtepIP    net.IPNet
+	Ports     map[string]struct{}
+	MacTable  map[string]Port
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	ResourceVersion	string
 }
 
 // build time check that struct implements interface
@@ -31,11 +34,15 @@ func NewBridge(in *pb.LogicalBridge) *Bridge {
 	// binary.BigEndian.PutUint32(vtepip, in.Spec.VtepIpPrefix.Addr.GetV4Addr())
 	// vip := net.IPNet{IP: vtepip, Mask: net.CIDRMask(int(in.Spec.VtepIpPrefix.Len), 32)}
 	// TODO: Vni: *in.Spec.Vni
-	return &Bridge{VlanID: in.Spec.VlanId, CreatedAt: time.Now()}
+	if in.Spec.VlanId < 1 || in.Spec.VlanId > 4095 {
+		return nil
+	}
+
+	return &Bridge{Name:in.Name, VlanID: in.Spec.VlanId, Ports:make(map[string]struct{}),MacTable: make(map[string]Port), CreatedAt: time.Now(), ResourceVersion:generateVersion()}
 }
 
 // ToPb transforms SVI object to protobuf message
-func (in *Bridge) ToPb() (*pb.LogicalBridge, error) {
+func (in *Bridge) ToPb() *pb.LogicalBridge {
 	bridge := &pb.LogicalBridge{
 		Spec: &pb.LogicalBridgeSpec{
 			Vni:    &in.Vni,
@@ -45,8 +52,8 @@ func (in *Bridge) ToPb() (*pb.LogicalBridge, error) {
 			OperStatus: pb.LBOperStatus_LB_OPER_STATUS_UP,
 		},
 	}
-	// TODO: add VtepIpPrefix
-	return bridge, nil
+
+	return bridge
 }
 
 // GetName returns object unique name

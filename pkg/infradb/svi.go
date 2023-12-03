@@ -2,7 +2,7 @@
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
 
 // Package models translates frontend protobuf messages to backend messages
-package models
+package infradb
 
 import (
 	"encoding/binary"
@@ -23,6 +23,7 @@ type Svi struct {
 	RemoteAs            uint32
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
+	ResourceVersion		string
 }
 
 // build time check that struct implements interface
@@ -51,7 +52,7 @@ func NewSvi(in *pb.Svi) *Svi {
 }
 
 // ToPb transforms SVI object to protobuf message
-func (in *Svi) ToPb() (*pb.Svi, error) {
+func (in *Svi) ToPb() *pb.Svi {
 	svi := &pb.Svi{
 		Spec: &pb.SviSpec{
 			Vrf:           in.VrfRefKey,
@@ -65,7 +66,7 @@ func (in *Svi) ToPb() (*pb.Svi, error) {
 		},
 	}
 	// TODO: add GwIpPrefix
-	return svi, nil
+	return svi
 }
 
 // GetName returns object unique name

@@ -2,7 +2,7 @@
 // Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
 
 // Package models translates frontend protobuf messages to backend messages
-package models
+package infradb
 
 import (
 	"net"
@@ -31,13 +31,14 @@ type Port struct {
 	LogicalBridgeRefKeys []string
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
+	ResourceVersion		string
 }
 
 // build time check that struct implements interface
 var _ EvpnObject[*pb.BridgePort] = (*Port)(nil)
 
-// NewPort creates new SVI object from protobuf message
-func NewPort(in *pb.BridgePort) *Port {
+// NewBridgePort creates new SVI object from protobuf message
+func NewBridgePort(in *pb.BridgePort) *Port {
 	mac := net.HardwareAddr(in.Spec.MacAddress)
 	return &Port{
 		Ptype:                BridgePortType(in.Spec.Ptype),
@@ -48,7 +49,7 @@ func NewPort(in *pb.BridgePort) *Port {
 }
 
 // ToPb transforms SVI object to protobuf message
-func (in *Port) ToPb() (*pb.BridgePort, error) {
+func (in *Port) ToPb() *pb.BridgePort {
 	port := &pb.BridgePort{
 		Spec: &pb.BridgePortSpec{
 			Ptype:          pb.BridgePortType(in.Ptype),
@@ -60,7 +61,7 @@ func (in *Port) ToPb() (*pb.BridgePort, error) {
 		},
 	}
 	// TODO: add VtepIpPrefix
-	return port, nil
+	return port
 }
 
 // GetName returns object unique name
